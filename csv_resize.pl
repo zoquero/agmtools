@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 #
-# Resize a CSV file with linear interpolatation.
+# Resize a CSV file with linear interpolation.
 #
 # zoquero@gmail.com 20160124
 #
@@ -10,16 +10,21 @@ use strict;
 use warnings;
 use POSIX qw(ceil);
 use POSIX qw(floor);
+use POSIX qw(round);
 
 sub usage () {
   print "Script to resize a CSV file with linear interpolatation.\n" .
   print "Usage:\n";
-  print "$0 csvFile separator numberOfRows\n";
+  print "$0 csvFile separator numberOfRows (-d)\n";
+  print "  csvFile:      Path to the CSV file to resize\n";
+  print "  separator:    String used as separador\n";
+  print "  numberOfRows: Number of rows of the resulting CSV\n";
+  print "  (-d):         (optional) Show debug messages\n";
   exit 1;
 }
 
 
-sub getMappedPosition($$$) {
+sub getMappedPos($$$) {
   my $originalNumberOfRows = $_[0];
   my $desiredNumberOfRows  = $_[1];
   my $n                    = $_[2];
@@ -35,6 +40,10 @@ if($#ARGV < 2) {
 my $csvFile=$ARGV[0];
 my $separator=$ARGV[1];
 my $desiredNumberOfRows=$ARGV[2];
+my $debug = 0;
+if($#ARGV >= 3 && $ARGV[3] eq "-d") {
+  $debug = 1;
+}
 my $fh;
 my $aField;
 my @fields;
@@ -59,6 +68,7 @@ my ($nr, $nc, @contents, $originalNumberOfRows) = (0, 0, ());
 while(<$fh>) {
   chomp;
   # print comments
+  next if ( /^$/ );
   if ( /^#/ ) {
     print "$_\n";
     next;
@@ -79,11 +89,10 @@ while(<$fh>) {
   $nr++;
 }
 
-$originalNumberOfRows = $nr + 1;
+$originalNumberOfRows = $nr;
 
 close($fh)
   or die "Could not close file '$csvFile' $!";
-
 
 if ($desiredNumberOfRows > $originalNumberOfRows) {
   die "Oversamping still not implemented";
@@ -91,18 +100,28 @@ if ($desiredNumberOfRows > $originalNumberOfRows) {
 
 my(@results) = ();
 my($mapped)  = (0);
-my($hmp)     = ceil($originalNumberOfRows/$desiredNumberOfRows);
+my($hmp)     = round($originalNumberOfRows/$desiredNumberOfRows);
+print "hmp=$hmp (how many points to average per resulting point)\n" if($debug);
+print "originalNumberOfRows=$originalNumberOfRows\n"                if($debug);
+print "desiredNumberOfRows=$desiredNumberOfRows\n"                  if($debug);
+
 for (my $i=0; $i < $desiredNumberOfRows; $i++) {
+  print "Row [$i]\n" if($debug);
   for (my $j=0; $j < $nc; $j++) {
-    $mapped = getMappedPosition($originalNumberOfRows, $desiredNumberOfRows, $i);
+    $mapped = getMappedPos($originalNumberOfRows, $desiredNumberOfRows, $i);
     my($c) = (0);
-    for(my $k = floor($mapped - $hmp + 1); $k <= floor($mapped + $hmp); $k++) {
+    my $first = floor($mapped - $hmp/2);
+    my $last  = $first + $hmp - 1;
+    print "  Col [$j], mapped [$mapped]. first=$first , last=$last\n" if($debug);
+    for(my $k = $first; $k <= $last ; $k++) {
       next if $k < 0;
-      next if $k >= $originalNumberOfRows - 1;
-      $c++;
+      last if $k >= $originalNumberOfRows;
       $results[$i][$j] += $contents[$k][$j];
+      $c++;
+      print "    Concatenating row [$k] (". $contents[$k][$j] .")\n" if($debug);
     }
     $results[$i][$j] /= $c;   # average, not splines
+    print "  Result for [$i][$j] = " . $results[$i][$j] . "\n" if($debug);
   }
 }
 
