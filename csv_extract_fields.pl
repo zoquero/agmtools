@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 #
-# Extract subset of CSV file
+# Extract some fields of a CSV file
 #
 # zoquero@gmail.com 20160123
 #
