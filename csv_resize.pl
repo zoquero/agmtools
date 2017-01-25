@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 #
-# Resize a CSV file interpolating.
+# Resize a CSV file with linear interpolatation.
 #
 # zoquero@gmail.com 20160124
 #
@@ -12,7 +12,7 @@ use POSIX qw(ceil);
 use POSIX qw(floor);
 
 sub usage () {
-  print "Script to resize a CSV file interpolating as needed " .
+  print "Script to resize a CSV file with linear interpolatation.\n" .
   print "Usage:\n";
   print "$0 csvFile separator numberOfRows\n";
   exit 1;
@@ -86,12 +86,12 @@ close($fh)
 
 
 if ($desiredNumberOfRows > $originalNumberOfRows) {
-  die "oversamping on next version";
+  die "Oversamping still not implemented";
 }
 
 my(@results) = ();
-my($mapped) = (0);
-my($hmp) = (ceil($originalNumberOfRows/$desiredNumberOfRows));
+my($mapped)  = (0);
+my($hmp)     = ceil($originalNumberOfRows/$desiredNumberOfRows);
 for (my $i=0; $i < $desiredNumberOfRows; $i++) {
   for (my $j=0; $j < $nc; $j++) {
     $mapped = getMappedPosition($originalNumberOfRows, $desiredNumberOfRows, $i);
