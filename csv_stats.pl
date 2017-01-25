@@ -84,6 +84,8 @@ open($fh, '<:encoding(UTF-8)', $csvFile)
   or die "Could not open file '$csvFile' $!";
 
 my @standardDeviations;
+my @maxs;
+my @mins;
 my @qacc;
 while(<$fh>) {
   chomp;
@@ -99,6 +101,8 @@ while(<$fh>) {
       die "It doesn't look like a number: [$aField]. Check separator, locale and format";
     }
     $qacc[$i] += ($averages[$i] - $aField) ** 2; # difference to the 2nd power
+    $maxs[$i] = $aField if(!exists($maxs[$i]) || $maxs[$i] < $aField);
+    $mins[$i] = $aField if(!exists($mins[$i]) || $mins[$i] > $aField);
     $i++;
   }
 }
@@ -111,10 +115,16 @@ for(my $i = 0; $i <= $#qacc; $i++) {
 }
 
 #
-# Now let's print results
+# Now let's print the results
 #
-print "average" . $separator . (join $separator, @averages);
+print "Average" . $separator . (join $separator, @averages);
 print "\n";
 
-print "standard deviation" . $separator . (join $separator, @standardDeviations);
+print "Standard deviation" . $separator . (join $separator, @standardDeviations);
+print "\n";
+
+print "Maximum"  . $separator . (join $separator, @maxs);
+print "\n";
+
+print "Minimum" . $separator . (join $separator, @mins);
 print "\n";
