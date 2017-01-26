@@ -53,6 +53,7 @@ while(<$fh>) {
 
   my($i) = (0);
   foreach $aField (@fields) {
+    $aField = 0 if ( $aField eq "" );
     ## Regexp from http://perldoc.perl.org/perlfaq4.html#How-do-I-determine-whether-a-scalar-is-a-number%2fwhole%2finteger%2ffloat%3f
     if ( $aField !~ /^-?(?:\d+\.?|\.\d)\d*\z/ &&
          $aField !~ /^[+-]?(?=\.?\d)\d*\.?\d*(?:e[+-]?\d+)?\z/i) {
@@ -95,6 +96,7 @@ while(<$fh>) {
 
   my($i) = (0);
   foreach $aField (@fields) {
+    $aField = 0 if ( $aField eq "" );
     ## Regexp from http://perldoc.perl.org/perlfaq4.html#How-do-I-determine-whether-a-scalar-is-a-number%2fwhole%2finteger%2ffloat%3f
     if ( $aField !~ /^-?(?:\d+\.?|\.\d)\d*\z/ &&
          $aField !~ /^[+-]?(?=\.?\d)\d*\.?\d*(?:e[+-]?\d+)?\z/i) {
