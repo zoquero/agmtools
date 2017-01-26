@@ -99,7 +99,6 @@ my($oversampling);
 if ($desiredNumberOfRows > $originalNumberOfRows) {
   # Oversamping   => We will interpolate
   $oversampling = 1;
-  die "Oversamping still not implemented";
 }
 else {
   # Undersampling => We will average
@@ -108,8 +107,6 @@ else {
 
 my(@results) = ();
 my($mapped)  = (0);
-my($hmp)     = round($originalNumberOfRows/$desiredNumberOfRows);
-print "hmp=$hmp (how many points to average per resulting point)\n" if($debug);
 print "originalNumberOfRows=$originalNumberOfRows\n"                if($debug);
 print "desiredNumberOfRows=$desiredNumberOfRows\n"                  if($debug);
 
@@ -117,18 +114,28 @@ for (my $i=0; $i < $desiredNumberOfRows; $i++) {
   print "Row [$i]\n" if($debug);
   for (my $j=0; $j < $nc; $j++) {
     $mapped = getMappedPos($originalNumberOfRows, $desiredNumberOfRows, $i);
-    my($c) = (0);
-    my $first = floor($mapped - $hmp/2);
-    my $last  = $first + $hmp - 1;
-    print "  Col [$j], mapped [$mapped]. first=$first , last=$last\n" if($debug);
-    for(my $k = $first; $k <= $last ; $k++) {
-      next if $k < 0;
-      last if $k >= $originalNumberOfRows;
-      $results[$i][$j] += $contents[$k][$j];
-      $c++;
-      print "    Concatenating row [$k] (". $contents[$k][$j] .")\n" if($debug);
+
+    if($oversampling) {
+      die "Oversamping still not implemented";
     }
-    $results[$i][$j] /= $c;   # average, not splines
+    else {
+      # We'll average at least two near points
+      my($hmp)     = round($originalNumberOfRows/$desiredNumberOfRows);
+      $hmp = $hmp < 2 ? 2 : $hmp;
+      print "hmp=$hmp (how many points to average per resulting point)\n" if($debug);
+      my($c) = (0);
+      my $first = floor($mapped - $hmp/2);
+      my $last  = $first + $hmp - 1;
+      print "  Col [$j], mapped [$mapped]. first=$first , last=$last\n" if($debug);
+      for(my $k = $first; $k <= $last ; $k++) {
+        next if $k < 0;
+        last if $k >= $originalNumberOfRows;
+        $results[$i][$j] += $contents[$k][$j];
+        $c++;
+        print "    Concatenating row [$k] (". $contents[$k][$j] .")\n" if($debug);
+      }
+      $results[$i][$j] /= $c;   # average, not splines
+    }
     print "  Result for [$i][$j] = " . $results[$i][$j] . "\n" if($debug);
   }
 }
