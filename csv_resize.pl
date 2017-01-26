@@ -79,6 +79,7 @@ while(<$fh>) {
   $nc = 0;
   foreach $aField (@fields) {
     ## Regexp from http://perldoc.perl.org/perlfaq4.html#How-do-I-determine-whether-a-scalar-is-a-number%2fwhole%2finteger%2ffloat%3f
+    $aField = 0 if ( $aField eq "" );
     if ( $aField !~ /^-?(?:\d+\.?|\.\d)\d*\z/ &&
          $aField !~ /^[+-]?(?=\.?\d)\d*\.?\d*(?:e[+-]?\d+)?\z/i) {
       die "It doesn't look like a number: [$aField]. Check separator, locale and format";
@@ -94,8 +95,15 @@ $originalNumberOfRows = $nr;
 close($fh)
   or die "Could not close file '$csvFile' $!";
 
+my($oversampling);
 if ($desiredNumberOfRows > $originalNumberOfRows) {
+  # Oversamping   => We will interpolate
+  $oversampling = 1;
   die "Oversamping still not implemented";
+}
+else {
+  # Undersampling => We will average
+  $oversampling = 0;
 }
 
 my(@results) = ();
