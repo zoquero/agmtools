@@ -57,7 +57,9 @@ while(<$fh>) {
     ## Regexp from http://perldoc.perl.org/perlfaq4.html#How-do-I-determine-whether-a-scalar-is-a-number%2fwhole%2finteger%2ffloat%3f
     if ( $aField !~ /^-?(?:\d+\.?|\.\d)\d*\z/ &&
          $aField !~ /^[+-]?(?=\.?\d)\d*\.?\d*(?:e[+-]?\d+)?\z/i) {
-      die "It doesn't look like a number: [$aField]. Check separator, locale and format";
+      warn "For nr=$nr it doesn't look like a number: [$aField]. Check separator, locale and format";
+      $i++;
+      next;
     }
     $acc[$i] += $aField;
     $i++;
@@ -119,14 +121,8 @@ for(my $i = 0; $i <= $#qacc; $i++) {
 #
 # Now let's print the results
 #
-print "Average" . $separator . (join $separator, @averages);
-print "\n";
-
-print "Standard deviation" . $separator . (join $separator, @standardDeviations);
-print "\n";
-
-print "Maximum"  . $separator . (join $separator, @maxs);
-print "\n";
-
-print "Minimum" . $separator . (join $separator, @mins);
-print "\n";
+print "Tuples;$nr\n";
+print "Average"        . $separator . (join $separator, @averages) . "\n";
+print "Std. deviation" . $separator . (join $separator, @standardDeviations) . "\n";
+print "Maximum"        . $separator . (join $separator, @maxs) . "\n";
+print "Minimum"        . $separator . (join $separator, @mins) . "\n";
